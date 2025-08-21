@@ -81,6 +81,12 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+
+app.get("/", (req, res) => {
+  res.send("HelpDesk API is running 🚀");
+});
+
+
 // Database connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/helpdesk')
   .then(() => {
