@@ -22,7 +22,11 @@ const PORT = process.env.PORT || 8080;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://smarthelpdesk.netlify.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
 }));
 
@@ -79,6 +83,10 @@ app.use((err, req, res, next) => {
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
+});
+
+app.get("/", (req, res) => {
+  res.send("HelpDesk API is running 🚀");
 });
 
 // Database connection
