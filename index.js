@@ -28,18 +28,8 @@ const allowedOrigins = [
 app.use(helmet());
 // CORS configuration - allow all origins for debugging
 app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like Postman or mobile apps)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-  optionsSuccessStatus: 200
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
 }));
 
 // Rate limiting
