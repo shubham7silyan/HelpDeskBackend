@@ -19,10 +19,10 @@ const { initializeQueue } = require('./services/queue');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const allowedOrigins = [
-  process.env.CLIENT_URL,       // localhost during dev
   "http://localhost:3000",      // explicitly allow localhost
-  "https://helpdeskfrontend-production.up.railway.app"  // Railway frontend
-];
+  "https://helpdeskfrontend-production.up.railway.app",  // Railway frontend
+  process.env.CLIENT_URL        // environment variable (if set)
+].filter(Boolean); // Remove any undefined values
 
 // Security middleware
 app.use(helmet());
