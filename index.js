@@ -20,7 +20,8 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const allowedOrigins = [
   process.env.CLIENT_URL,       // localhost during dev
-  "http://localhost:3000"       // explicitly allow localhost
+  "http://localhost:3000",      // explicitly allow localhost
+  "https://helpdeskfrontend-production.up.railway.app"  // Railway frontend
 ];
 
 // Security middleware
