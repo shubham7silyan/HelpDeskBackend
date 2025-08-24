@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 
 const seedData = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/helpdesk');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://shubham7silyan:SxyJ965GjqghlAS2@helpdeskcluster.lfszo5o.mongodb.net/?retryWrites=true&w=majority&appName=HelpdeskCluster');
     logger.info('Connected to MongoDB for seeding');
 
     // Clear existing data

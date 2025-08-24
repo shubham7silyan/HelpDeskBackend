@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function createMissingUsers() {
-  const baseURL = 'http://localhost:8080/api';
+  const baseURL = 'https://helpdeskbackend-production.up.railway.app/api';
   
   try {
     // Create agent user

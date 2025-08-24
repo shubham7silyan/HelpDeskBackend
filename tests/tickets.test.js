@@ -8,7 +8,7 @@ describe('Tickets', () => {
   let userToken, agentToken, userId, agentId;
 
   beforeAll(async () => {
-    const url = process.env.MONGO_URI || 'mongodb://localhost:27017/helpdesk-test';
+    const url = process.env.MONGO_URI || 'mongodb+srv://shubham7silyan:SxyJ965GjqghlAS2@helpdeskcluster.lfszo5o.mongodb.net/helpdesk-test?retryWrites=true&w=majority&appName=HelpdeskCluster';
     await mongoose.connect(url);
   });
 

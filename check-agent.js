@@ -4,7 +4,7 @@ const User = require('./models/User');
 
 async function checkAgent() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/helpdesk');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://shubham7silyan:SxyJ965GjqghlAS2@helpdeskcluster.lfszo5o.mongodb.net/?retryWrites=true&w=majority&appName=HelpdeskCluster');
     console.log('Connected to MongoDB');
 
     const agent = await User.findOne({ email: 'agent@helpdesk.com' });
