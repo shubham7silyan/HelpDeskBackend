@@ -18,16 +18,27 @@ const { initializeQueue } = require('./services/queue');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const allowedOrigins = [
+  process.env.CLIENT_URL,       // localhost during dev
+  "http://localhost:3000"       // explicitly allow localhost
+];
 
 // Security middleware
 app.use(helmet());
+// CORS configuration - allow all origins for debugging
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://smarthelpdesk.netlify.app',
-    process.env.CLIENT_URL
-  ].filter(Boolean),
-  credentials: true
+  origin: function(origin, callback) {
+    // allow requests with no origin (like Postman or mobile apps)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  optionsSuccessStatus: 200
 }));
 
 // Rate limiting

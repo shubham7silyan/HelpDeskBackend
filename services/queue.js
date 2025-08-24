@@ -8,10 +8,18 @@ let redis;
 
 const initializeQueue = async () => {
   try {
-    // Initialize Redis connection
-    redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    // Use Render Redis URL (from env), fallback to local for dev
+    redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
       maxRetriesPerRequest: null,
       retryDelayOnFailover: 100
+    });
+
+    redis.on("connect", () => {
+      console.log("✅ Connected to Redis");
+    });
+
+    redis.on("error", (err) => {
+      console.error("❌ Redis error:", err);
     });
 
     // Initialize queue
