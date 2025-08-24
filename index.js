@@ -18,17 +18,16 @@ const { initializeQueue } = require('./services/queue');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const allowedOrigins = [
-  "http://localhost:3000",      // explicitly allow localhost
-  "https://helpdeskfrontend-production.up.railway.app",  // Railway frontend
-  process.env.CLIENT_URL        // environment variable (if set)
-].filter(Boolean); // Remove any undefined values
 
 // Security middleware
 app.use(helmet());
 // CORS configuration - allow all origins for debugging
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://helpdeskfrontend-production.up.railway.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
 }));
 
