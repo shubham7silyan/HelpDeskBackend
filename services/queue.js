@@ -5,24 +5,38 @@ const { processTicketTriage } = require('./agentService');
 
 let triageQueue;
 let redis;
+let queueEnabled = false;
 
 const initializeQueue = async () => {
   try {
-    // Use Render Redis URL (from env), fallback to local for dev
-    redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
-      maxRetriesPerRequest: null,
-      retryDelayOnFailover: 100
+    // Skip Redis initialization if no URL provided or in production without Redis
+    if (!process.env.REDIS_URL || process.env.REDIS_URL.includes('red-d2jqmse3jp1c73fequjg')) {
+      logger.warn('Redis URL not available or invalid, running without queue functionality');
+      queueEnabled = false;
+      return;
+    }
+
+    redis = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 3,
+      retryDelayOnFailover: 100,
+      connectTimeout: 5000,
+      lazyConnect: true
     });
 
+    // Test connection
+    await redis.ping();
+
     redis.on("connect", () => {
-      console.log("✅ Connected to Redis");
+      logger.info("✅ Connected to Redis");
+      queueEnabled = true;
     });
 
     redis.on("error", (err) => {
-      console.error("❌ Redis error:", err);
+      logger.error("❌ Redis error:", err);
+      queueEnabled = false;
     });
 
-    // Initialize queue
+    // Initialize queue only if Redis is connected
     triageQueue = new Queue('ticket-triage', {
       connection: redis,
       defaultJobOptions: {
@@ -61,20 +75,33 @@ const initializeQueue = async () => {
       logger.error(`Triage job ${job.id} failed for ticket ${job.data.ticketId}:`, err);
     });
 
+    queueEnabled = true;
     logger.info('Queue and worker initialized successfully');
   } catch (error) {
-    logger.error('Failed to initialize queue:', error);
-    throw error;
+    logger.warn('Failed to initialize queue, continuing without queue functionality:', error.message);
+    queueEnabled = false;
+    // Don't throw error - allow server to start without Redis
   }
 };
 
 const addTriageJob = async (ticketId, traceId) => {
+  if (!queueEnabled || !triageQueue) {
+    logger.info(`Queue not available, processing triage synchronously for ticket ${ticketId}`);
+    try {
+      await processTicketTriage(ticketId, traceId);
+      return { id: `sync-${ticketId}-${Date.now()}` };
+    } catch (error) {
+      logger.error(`Synchronous triage failed for ticket ${ticketId}:`, error);
+      throw error;
+    }
+  }
+
   try {
     const job = await triageQueue.add('process-triage', {
       ticketId,
       traceId
     }, {
-      delay: 1000, // Small delay to ensure ticket is saved
+      delay: 1000,
       jobId: `triage-${ticketId}-${Date.now()}`
     });
 
@@ -87,6 +114,16 @@ const addTriageJob = async (ticketId, traceId) => {
 };
 
 const getQueueStats = async () => {
+  if (!queueEnabled || !triageQueue) {
+    return {
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+      enabled: false
+    };
+  }
+
   try {
     const waiting = await triageQueue.getWaiting();
     const active = await triageQueue.getActive();
@@ -97,11 +134,18 @@ const getQueueStats = async () => {
       waiting: waiting.length,
       active: active.length,
       completed: completed.length,
-      failed: failed.length
+      failed: failed.length,
+      enabled: true
     };
   } catch (error) {
     logger.error('Failed to get queue stats:', error);
-    return null;
+    return {
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+      enabled: false
+    };
   }
 };
 
