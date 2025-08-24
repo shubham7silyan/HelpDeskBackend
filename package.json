@@ -4,6 +4,7 @@
   "description": "Smart Helpdesk API Server",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest",
     "seed": "node scripts/seed.js"
